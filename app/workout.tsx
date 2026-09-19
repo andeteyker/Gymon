@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
 import { demoWorkout } from "@/data/demoWorkout";
 import { exercises } from "@/data/exercises";
+import { workoutSessionRepository } from "@/data/workoutSessionRepository";
 import { applyMonsterXp, evaluateWorkout } from "@/domain/progression";
 import { WorkoutSession } from "@/domain/types";
 
@@ -10,11 +11,26 @@ const baselines=demoWorkout.exercises.map(e=>({exerciseId:e.exerciseId,estimated
 export default function WorkoutScreen(){
  const [done,setDone]=useState<Record<string,boolean[]>>(()=>Object.fromEntries(demoWorkout.exercises.map(e=>[e.exerciseId,Array(e.sets).fill(false)])));
  const [result,setResult]=useState<ReturnType<typeof evaluateWorkout>|null>(null);
+ const [saving,setSaving]=useState(false);
+ const [saved,setSaved]=useState(false);
  const completed=useMemo(()=>Object.values(done).flat().filter(Boolean).length,[done]);
- function toggle(id:string,index:number){setResult(null);setDone(prev=>({...prev,[id]:prev[id].map((v,i)=>i===index?!v:v)}));}
- function finish(){
-  const session:WorkoutSession={id:demoWorkout.id,date:new Date().toISOString(),exercises:demoWorkout.exercises.map(e=>({exerciseId:e.exerciseId,sets:Array.from({length:e.sets},(_,i)=>({reps:e.reps,weightKg:e.weightKg,completed:done[e.exerciseId][i]}))}))};
-  setResult(evaluateWorkout(session,exercises,baselines));
+ function toggle(id:string,index:number){setResult(null);setSaved(false);setDone(prev=>({...prev,[id]:prev[id].map((v,i)=>i===index?!v:v)}));}
+ async function finish(){
+  if(saving)return;
+  setSaving(true);
+  const session:WorkoutSession={
+   id:`${demoWorkout.id}-${Date.now()}`,
+   date:new Date().toISOString(),
+   exercises:demoWorkout.exercises.map(e=>({
+    exerciseId:e.exerciseId,
+    sets:Array.from({length:e.sets},(_,i)=>({reps:e.reps,weightKg:e.weightKg,completed:done[e.exerciseId][i]}))
+   }))
+  };
+  try{
+   await workoutSessionRepository.save(session);
+   setResult(evaluateWorkout(session,exercises,baselines));
+   setSaved(true);
+  }finally{setSaving(false);}
  }
  const level=result?applyMonsterXp(1,70,result.xp):null;
  return <SafeAreaView style={styles.page}><ScrollView contentContainerStyle={styles.content}>
@@ -23,8 +39,8 @@ export default function WorkoutScreen(){
   {demoWorkout.exercises.map(e=><View key={e.exerciseId} style={styles.card}><Text style={styles.exercise}>{e.name}</Text><Text style={styles.target}>{e.sets} × {e.reps} @ {e.weightKg} kg</Text>
    <View style={styles.setRow}>{Array.from({length:e.sets},(_,i)=><Pressable key={i} onPress={()=>toggle(e.exerciseId,i)} style={[styles.setButton,done[e.exerciseId][i]&&styles.setDone]}><Text style={[styles.setText,done[e.exerciseId][i]&&styles.setTextDone]}>{done[e.exerciseId][i]?"✓":i+1}</Text></Pressable>)}</View>
   </View>)}
-  <Pressable disabled={!completed} onPress={finish} style={[styles.finish,!completed&&styles.disabled]}><Text style={styles.finishText}>FINISH WORKOUT</Text></Pressable>
-  {result&&<View style={styles.reward}><Text style={styles.rewardTitle}>WORKOUT COMPLETE</Text><Text style={styles.xp}>+{result.xp} XP</Text><Text style={styles.rewardText}>Voltex Lv.{level?.level} · {level?.xp}/{level?xpFor(level.level):0} XP</Text>{Object.entries(result.muscleXp).sort((a,b)=>(b[1]??0)-(a[1]??0)).slice(0,3).map(([m,x])=><Text key={m} style={styles.rewardText}>{m.toUpperCase()} +{x}</Text>)}</View>}
+  <Pressable disabled={!completed||saving} onPress={finish} style={[styles.finish,(!completed||saving)&&styles.disabled]}><Text style={styles.finishText}>{saving?"SAVING...":"FINISH WORKOUT"}</Text></Pressable>
+  {result&&<View style={styles.reward}><Text style={styles.rewardTitle}>WORKOUT COMPLETE{saved?" · SAVED":""}</Text><Text style={styles.xp}>+{result.xp} XP</Text><Text style={styles.rewardText}>Voltex Lv.{level?.level} · {level?.xp}/{level?xpFor(level.level):0} XP</Text>{Object.entries(result.muscleXp).sort((a,b)=>(b[1]??0)-(a[1]??0)).slice(0,3).map(([m,x])=><Text key={m} style={styles.rewardText}>{m.toUpperCase()} +{x}</Text>)}</View>}
  </ScrollView></SafeAreaView>
 }
 function xpFor(level:number){return 100+(level-1)*35;}
