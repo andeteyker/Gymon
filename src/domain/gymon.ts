@@ -1,6 +1,5 @@
 import { Monster, MuscleGroup, WorkoutReward } from "./types";
 import { applyMonsterXp } from "./progression";
-import { syncMoveLoadout } from "./moves";
 
 const muscles:MuscleGroup[]=["chest","back","shoulders","biceps","triceps","core","quads","hamstrings","glutes","calves"];
 
@@ -16,5 +15,5 @@ export function applyWorkoutToMonster(monster:Monster,reward:WorkoutReward):Mons
  for(const [muscle,xp] of Object.entries(reward.muscleXp)) next.stats.muscles[muscle as MuscleGroup]+=(xp??0);
  next.stats.performance.strength+=Math.max(0,Math.round(reward.relativeImprovement*10));
  if(next.level>=5&&next.formId==="voltex-stage-1")next.formId="voltex-stage-2";
- return syncMoveLoadout(next);
+ return next;
 }
