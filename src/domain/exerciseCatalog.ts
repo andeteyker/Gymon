@@ -10,6 +10,7 @@ export interface ExerciseCatalogEntry{
  progression:"load"|"reps"|"duration"|"pace"|"distance"; baseEffort:number;
 }
 
+// Optional convenience feature. Core workouts and progression never require a training place.
 export interface TrainingPlace{
  id:string; name:string; kind:"gym"|"home"|"outdoor"|"calisthenics"|"custom";
  equipment:EquipmentId[];
