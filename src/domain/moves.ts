@@ -1,4 +1,5 @@
 import { Monster, Move, MuscleGroup } from "./types";
+import { muscleLevelFromXp } from "./muscleProgression";
 
 const muscleThemes:Record<MuscleGroup,{attack:string;defense:string;status:string}> = {
  chest:{attack:"Drive",defense:"Brace",status:"Presence"},
@@ -15,7 +16,7 @@ const muscleThemes:Record<MuscleGroup,{attack:string;defense:string;status:strin
 
 export const voltexMoves:Move[]=Object.entries(muscleThemes).flatMap(([key,names],index)=>{
  const muscle=key as MuscleGroup;
- const tier=20+index*2;
+ const tier=2+Math.floor(index/2);
  return [
   {id:`${muscle}-attack-1`,name:`${title(muscle)} ${names.attack}`,category:"attack",power:32+index,accuracy:95,priority:0,energyCost:10,requiredMuscle:muscle,requiredMuscleXp:tier},
   {id:`${muscle}-defense-1`,name:`${title(muscle)} ${names.defense}`,category:"defense",accuracy:100,priority:1,energyCost:9,requiredMuscle:muscle,requiredMuscleXp:tier,guardPercent:30},
@@ -27,7 +28,7 @@ export function unlockedMoves(monster:Monster):Move[]{
  return voltexMoves.filter(move=>{
   if((move.requiredLevel??1)>monster.level)return false;
   if(move.evolutionExclusive&&move.evolutionExclusive!==monster.formId)return false;
-  if(move.requiredMuscle&&monster.stats.muscles[move.requiredMuscle]<(move.requiredMuscleXp??0))return false;
+  if(move.requiredMuscle&&muscleLevelFromXp(move.requiredMuscle,monster.stats.muscles[move.requiredMuscle]).level<(move.requiredMuscleXp??1))return false;
   return true;
  });
 }
