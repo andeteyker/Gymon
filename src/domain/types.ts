@@ -9,6 +9,8 @@ export type WorkoutTrustFlag = "extreme-volume-jump"|"implausible-set"|"excessiv
 export interface WorkoutTrust { score:number; flags:WorkoutTrustFlag[]; rewardMultiplier:number; }
 export interface MonsterStats { muscles:Record<MuscleGroup,number>; performance:Record<PerformanceStat,number>; }
 export interface Monster { id:string; nickname:string; starterFamily:string; formId:string; level:number; xp:number; tokens:number; stats:MonsterStats; activeMoveIds:string[]; }
-export interface Move { id:string; name:string; power:number; accuracy:number; priority:number; energyCost:number; requiredMuscle?:MuscleGroup; requiredLevel?:number; evolutionExclusive?:string; }
+export type MoveCategory = "attack"|"defense"|"status"|"utility";
+export type StatModifier = { stat:"attack"|"defense"|"speed"; stages:number; target:"self"|"opponent" };
+export interface Move { id:string; name:string; category:MoveCategory; power?:number; accuracy:number; priority:number; energyCost:number; requiredMuscle?:MuscleGroup; requiredMuscleXp?:number; requiredLevel?:number; evolutionExclusive?:string; modifiers?:StatModifier[]; guardPercent?:number; healPercent?:number; }
 export interface Evolution { id:string; name:string; stage:number; levelCap:number; previousForms:string[]; nextForms:string[]; requirements:Record<string,number>; exclusiveMoveIds:string[]; }
 export interface WorkoutReward { xp:number; rawXp:number; relativeImprovement:number; muscleXp:Partial<Record<MuscleGroup,number>>; completedSets:number; trust:WorkoutTrust; }
