@@ -14,8 +14,8 @@ Each exercise stores category, tracking mode, required equipment, normalized Gym
 
 Absolute kilograms never directly determine Gymon XP. Reward calculation uses completion, personal improvement, quality and trust. Muscle XP is then distributed using normalized muscle shares.
 
-## Training places
-A training place is an equipment inventory. The available exercise set is derived automatically by checking whether all equipment required by an exercise exists at the place.
+## Training places (optional convenience feature)
+Training places are not required for workouts, plans, XP or Gymon progression. The core product starts from exercises and training plans. A training place is an optional equipment inventory used to filter compatible exercises and help Gymon+ generate equipment-aware plans. The available exercise set is derived automatically by checking whether all equipment required by an exercise exists at the place.
 
 Built-in place templates: Commercial Gym, Home, Outdoor, Calisthenics Park. Custom places use the same model.
 
