@@ -10,7 +10,7 @@ export default function HomeScreen() {
         <View style={styles.monsterPlaceholder}><Text style={styles.monster}>VOLTEX</Text><Text style={styles.level}>LV. 1</Text></View>
         <Text style={styles.title}>Your training builds your monster.</Text>
         <Text style={styles.copy}>Complete workouts, develop real fitness stats, unlock moves and evolve along your own path.</Text>
-        <Pressable style={styles.button} onPress={() => router.push("/workout")}><Text style={styles.buttonText}>START FIRST WORKOUT</Text></Pressable>
+        <Pressable style={styles.button} onPress={() => router.push("/demo")}><Text style={styles.buttonText}>OPEN GYMON DEMO</Text></Pressable>
       </View>
     </SafeAreaView>
   );
